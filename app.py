@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import date
 
@@ -32,15 +32,38 @@ def drop_db():
 
 @app.cli.command('seed')
 def seed_db():
-    card = Card(
-        title = 'Start the project',
-        description = 'Stage 1 - Creating the database',
-        status = 'To Do',
-        priority = 'High',
-        date = date.today()
-    )
+    cards = [
+        Card(
+            title = 'Start the project',
+            description = 'Stage 1 - Create the database',
+            status = 'To Do',
+            priority = 'High',
+            date = date.today()
+        ),
+        Card(
+            title = "SQLAlchemy",
+            description = "Stage 2 - Integrate ORM",
+            status = "Ongoing",
+            priority = "High",
+            date = date.today()
+        ),
+        Card(
+            title = "ORM Queries",
+            description = "Stage 3 - Implement several queries",
+            status = "Ongoing",
+            priority = "Medium",
+            date = date.today()
+        ),
+        Card(
+            title = "Marshmallow",
+            description = "Stage 4 - Implement Marshmallow to jsonify models",
+            status = "Ongoing",
+            priority = "Medium",
+            date = date.today()
+        )
+    ]
 
-    db.session.add(card)
+    db.session.add_all(cards)
     db.session.commit()
     print('Tables seeded')
 
