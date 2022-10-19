@@ -1,18 +1,21 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
-from datetime import date
+from datetime import date, timedelta
 from flask_marshmallow import Marshmallow
 from flask_bcrypt import Bcrypt
 from sqlalchemy.exc import IntegrityError
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required
 
 app = Flask(__name__)
-app.config ['JSON_SORT_KEYS'] = False
 
+app.config ['JSON_SORT_KEYS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://trello_dev:password123@127.0.0.1:5432/trello'
+app.config['JWT_SECRET_KEY'] = 'hello there'
 
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 bcrypt = Bcrypt(app)
+jwt = JWTManager(app)
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -110,15 +113,12 @@ def seed_db():
 @app.route('/auth/register/', methods=['POST'])
 def auth_register():
     try:
-        # Load the posted user info and parse the JSON
-        user_info = UserSchema().load(request.json)
         # Create a new User model instance from the user_info
         user = User(
-            email = user_info['email'],
-            password = bcrypt.generate_password_hash(user_info['password']).decode('utf8'),
-            name = user_info['name']
+            email = request.json['email'],
+            password = bcrypt.generate_password_hash(request.json['password']).decode('utf8'),
+            name = request.json['name']
         )
-
         # Add and commit user to DB
         db.session.add(user)
         db.session.commit()
@@ -128,7 +128,22 @@ def auth_register():
         return {'error': 'Email address already in use'}, 409
 
 
+@app.route('/auth/login/', methods=['POST'])
+def auth_login():
+    # Find a user by email address
+    stmt = db.select(User).filter_by(email=request.json['email'])
+    user = db.session.scalar(stmt)
+    # If user exists and password is correct
+    if user and bcrypt.check_password_hash(user.password, request.json['password']):
+        # return UserSchema(exclude=['password']).dump(user)
+        token = create_access_token(identity=str(user.id), expires_delta=timedelta(days=1))
+        return {'email': user.email, 'token': token, 'is_admin': user.is_admin}
+    else:
+        return {'error': 'Invalid email or password'}, 401
+    
+
 @app.route('/cards/')
+@jwt_required()
 def all_cards():
     # select * from cards;
     # cards = Card.query.all()
