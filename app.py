@@ -1,3 +1,4 @@
+from turtle import color
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from datetime import date, timedelta
@@ -166,6 +167,20 @@ def all_cards():
     # print(cards)
     # print(cards[0].__dict__)
 
+# This is the command from ORM Queries and Marshmallow
+@app.cli.command('all_cards')
+def all_cards():
+    # These commands are used for queries 
+    stmt = db.select(Card)
+    # stmt = db.select(Card).where(db.or_(Card.status == 'Ongoing', Card.priority == 'High'), ) # or .filter_by (status=' To Do' )
+    # stmt = db.select(Card).order_by(Card.priority.desc(), Card.title)
+    cards = db.session.scalars(stmt).all()
+    for card in cards:
+        # print(card.__dict__)
+        print(card.title, card.priority)
+    # print(cards)
+    # print(cards[0].__dict__)
+
 @app.cli.command('first_card')
 def first_card():
     # select * from cards limit 1;
@@ -173,9 +188,11 @@ def first_card():
     stmt = db.select(Card).limit(1)
     card = db.session.scalar(stmt)
     print(card.__dict__)
+    
 
 @app.cli.command('count_ongoing')
 def count_ongoing():
+    # the db.func.count() function returns the count of cards in the database
     stmt = db.select(db.func.count()).select_from(Card).filter_by(status='Ongoing')
     cards = db.session.scalar(stmt)
     print(cards)
@@ -183,5 +200,5 @@ def count_ongoing():
 
 @app.route('/')
 def index():
-    return "Hello World!"
+    return "<h1 style='color:red;'>Hello World!</h1>"
 
