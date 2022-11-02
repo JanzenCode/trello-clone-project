@@ -45,7 +45,7 @@ class Card(db.Model):
 class CardSchema(ma.Schema):
     class Meta:
         fields = ('id', 'title', 'description', 'status', 'priority', 'date')
-        ordered = True
+        # ordered = True
 
 
 def authorize():
@@ -167,7 +167,21 @@ def all_cards():
     # print(cards)
     # print(cards[0].__dict__)
 
-# This is the command from ORM Queries and Marshmallow
+# This is a marshmallow based route for GET requests, POST, etc...
+# and Schema Practice from Lecture ORM/Marshmallow
+
+# class CardSchema(ma.Schema):
+#     class Meta:
+#         fields = ('id', 'title', 'description', 'status', 'priority', 'date')
+#         ordered = True
+
+# @app.route('/cards/')
+# def all_cards():
+#     stmt = db.select(Card).order_by(Card.priority.desc(), Card.title)
+#     cards = db.session.scalars(stmt)
+#     return CardSchema(many=True).dump(cards)
+
+# This is the command from ORM Queries 
 @app.cli.command('all_cards')
 def all_cards():
     # These commands are used for queries 
@@ -180,6 +194,8 @@ def all_cards():
         print(card.title, card.priority)
     # print(cards)
     # print(cards[0].__dict__)
+
+
 
 @app.cli.command('first_card')
 def first_card():
