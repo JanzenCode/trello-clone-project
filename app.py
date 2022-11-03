@@ -78,6 +78,12 @@ def seed_db():
             name='John Cleese',
             email='someone@spam.com',
             password=bcrypt.generate_password_hash('12345').decode('utf-8')
+        ),
+        User(
+            name='Ron Swanson',
+            email='ron@spam.com',
+            password=bcrypt.generate_password_hash('meettom').decode('utf-8'),
+            is_admin=True
         )
     ]
 
@@ -167,6 +173,10 @@ def all_cards():
     # print(cards)
     # print(cards[0].__dict__)
 
+
+#  //////////////////////////////////////////////////////////////////////////
+
+
 # This is a marshmallow based route for GET requests, POST, etc...
 # and Schema Practice from Lecture ORM/Marshmallow
 
@@ -181,6 +191,9 @@ def all_cards():
 #     cards = db.session.scalars(stmt)
 #     return CardSchema(many=True).dump(cards)
 
+
+
+
 # This is the command from ORM Queries 
 @app.cli.command('all_cards')
 def all_cards():
@@ -194,8 +207,6 @@ def all_cards():
         print(card.title, card.priority)
     # print(cards)
     # print(cards[0].__dict__)
-
-
 
 @app.cli.command('first_card')
 def first_card():
